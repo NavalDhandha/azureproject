@@ -1,0 +1,119 @@
+-- DimUsers
+import dlt
+
+expectations = {
+    'rule_1' : 'user_id IS NOT NULL'
+}
+
+@dlt.table()
+@dlt.expect_all_or_drop(expectations)
+def dimusers_stg():
+    df = spark.readStream.table('spotify_cata.staging.dimusers')
+    return df
+
+
+dlt.create_streaming_table(
+    name='dimusers',
+    expect_all_or_drop = expectations
+)
+
+dlt.create_auto_cdc_flow(
+    target = 'dimusers',
+    source = 'dimusers_stg',
+    keys = ['user_id'],
+    sequence_by= 'updated_at',
+    stored_as_scd_type= 2,
+    track_history_except_column_list=None,
+    name= None,
+    once= False
+)
+
+--DimTrack
+import dlt
+
+@dlt.table()
+def dimtrack_stg():
+    df = spark.readStream.table('spotify_cata.staging.dimtrack')
+    return df
+
+
+dlt.create_streaming_table(name='dimtrack')
+
+dlt.create_auto_cdc_flow(
+    target = 'dimtrack',
+    source = 'dimtrack_stg',
+    keys = ['track_id'],
+    sequence_by= 'updated_at',
+    stored_as_scd_type= 2,
+    track_history_except_column_list=None,
+    name= None,
+    once= False
+)
+
+--DimArtist
+import dlt
+
+@dlt.table()
+def dimartist_stg():
+    df = spark.readStream.table('spotify_cata.staging.dimartist')
+    return df
+
+
+dlt.create_streaming_table(name='dimartist')
+
+dlt.create_auto_cdc_flow(
+    target = 'dimartist',
+    source = 'dimartist_stg',
+    keys = ['artist_id'],
+    sequence_by= 'updated_at',
+    stored_as_scd_type= 2,
+    track_history_except_column_list=None,
+    name= None,
+    once= False
+)
+
+--DimDates
+import dlt
+
+@dlt.table()
+def dimdates_stg():
+    df = spark.readStream.table('spotify_cata.staging.dimdates')
+    return df
+
+
+dlt.create_streaming_table(name='dimdates')
+
+dlt.create_auto_cdc_flow(
+    target = 'dimdates',
+    source = 'dimdates_stg',
+    keys = ['date_key'],
+    sequence_by= 'date',
+    stored_as_scd_type= 2,
+    track_history_except_column_list=None,
+    name= None,
+    once= False
+)
+
+
+--FactStream
+import dlt
+
+@dlt.table()
+def factstream_stg():
+    df = spark.readStream.table('spotify_cata.staging.factstream')
+    return df
+
+
+dlt.create_streaming_table(name='factstream')
+
+dlt.create_auto_cdc_flow(
+    target = 'factstream',
+    source = 'factstream_stg',
+    keys = ['stream_id'],
+    sequence_by= 'stream_timestamp',
+    stored_as_scd_type= 1,
+    track_history_except_column_list=None,
+    name= None,
+    once= False
+)
+
